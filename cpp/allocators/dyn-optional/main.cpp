@@ -1,6 +1,5 @@
 #include <memory>
 #include <utility>
-#include <vector>
 
 namespace ds {
 template <typename T, typename Allocator = std::allocator<T>>
@@ -91,6 +90,10 @@ public:
 
     dyn_optional(dyn_optional&& rhs)
         : dyn_optional_impl<T, Allocator>(rhs.allocator_, std::exchange(rhs.ptr_, nullptr))
+    {}
+
+    dyn_optional(dyn_optional&& rhs, allocator_type const& allocator)
+        : dyn_optional_impl<T, Allocator>(allocator, std::exchange(rhs.ptr_, nullptr))
     {}
 
     T const& value() const { return *this->ptr_; }

@@ -44,7 +44,7 @@ public:
     size_type size() const { return std::clamp(count_, static_cast<size_t>(0), N); }
     bool empty() const { return count_ == 0; }
 
-    constexpr ~ring_buffer() = default;
+    ~ring_buffer() = default;
 private:
     storage_type storage_;
     size_type tail_{0}; // write index - back of the queue
@@ -57,6 +57,7 @@ private:
 int main(int argc, char** argv)
 {
     ds::ring_buffer<int, 2> q;
+    
     std::cout << "size: " << q.size() << std::endl;
     std::cout << "empty: " << q.empty() << std::endl;
     q.push_back(1);
