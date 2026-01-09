@@ -24,7 +24,7 @@ private:
 
     void do_deallocate(void* p, std::size_t bytes, std::size_t alignment) override
     {
-        std::cout << "Deallocating " << bytes << " bytes with an alignment of " << alignment << " at address "
+        std::cout << "Deallocating " << std::fixed << bytes << std::fixed << " bytes with an alignment of " << alignment << " at address "
                   << std::hex << p << std::endl;
         upstream_->deallocate(p, bytes, alignment);
     }
@@ -69,12 +69,23 @@ private:
 
 int main(int argc, char** argv)
 {
-    allocators::test_resource resource{"test_resource", std::pmr::get_default_resource()};
-    std::pmr::polymorphic_allocator<std::byte> allocator{&resource};
-    std::pmr::vector<person> vs{allocator};
+    {
+        unsigned char buffer[512];
+        std::pmr::monotonic_buffer_resource monotonic_buffer_resource(buffer, 512);
+        allocators::test_resource resource{"test_resource", &monotonic_buffer_resource};
+        std::pmr::polymorphic_allocator<person> allocator{&resource};
+        std::pmr::vector<person> vs{allocator};
 
-    vs.emplace_back("Blair", "Davidson");
-    vs.emplace_back("Alice", "Davidson");
+        vs.emplace_back("Blair", "Davidson");
+        vs.emplace_back("Alice", "Davidson");
+
+        std::cout << "Address of element 0: " << std::hex << &(vs[0]) << std::endl;
+        std::cout << "Address of element 0 first name: : " << std::hex << ((void*)vs[0].first().data()) << std::endl;
+        std::cout << "Address of element 0 second name: : " << std::hex << ((void*)vs[0].last().data()) << std::endl;
+        std::cout << "Address of element 1: " << std::hex << &(vs[1]) << std::endl;
+        std::cout << "Address of element 1 first name: : " << std::hex << ((void*)vs[1].first().data()) << std::endl;
+        std::cout << "Address of element 1 second name: : " << std::hex << ((void*)vs[1].last().data()) << std::endl;
+    }
 
     return 0;
 }
