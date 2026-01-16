@@ -1,9 +1,10 @@
 #include <cassert>
-#include <iterator>
 #include <concepts>
 #include <functional>
 #include <iostream>
+#include <iterator>
 #include <list>
+#include <queue>
 #include <tuple>
 #include <unordered_map>
 #include <utility>
@@ -109,6 +110,79 @@ private:
     size_type size_{};
 };
 
+class bfs_path
+{
+public:
+    using size_type = size_t;
+    template <graph_connection_type type>
+    bfs_path(graph<type> const& g, size_type s)
+        : start_{s}
+        , visited_(g.size(), false)
+        , parent_(g.size())
+        , size_{g.size()}
+        , distance_(g.size(), 0)
+    {
+        bfs<type>(g);
+    }
+    bool has_path(size_type q) const { return visited_[q]; }
+
+    std::vector<size_type> path(size_type q) const
+    {
+        std::vector<size_type> v;
+        v.reserve(size_);
+
+        if (visited_[q])
+        {
+            v.push_back(q);
+            auto p = parent_[q];
+            while (p != start_)
+            {
+                v.push_back(p);
+                p = parent_[p];
+            }
+            v.push_back(start_);
+            std::reverse(v.begin(), v.end());
+        }
+        return v;
+    }
+
+    size_type distance(size_type p) const { return distance_[p]; }
+
+private:
+    template <graph_connection_type type>
+    void bfs(graph<type> const& g)
+    {
+        std::queue<int> q;
+
+        q.push(start_);
+        visited_[start_] = true;
+        distance_[start_] = 0;
+
+        while (!q.empty())
+        {
+            auto t = q.front();
+            q.pop();
+
+            for (auto const& n : g.neighbors(t))
+            {
+                if (!visited_[n])
+                {
+                    visited_[n] = true;
+                    parent_[n] = t;
+                    distance_[n] = distance_[t] + 1;
+                    q.push(n);
+                }
+            }
+        }
+    }
+
+    size_type start_{};
+    std::vector<bool> visited_;
+    std::vector<size_type> parent_;
+    std::vector<size_type> distance_;
+    size_type size_{};
+};
+
 } // namespace graphs
 
 int main(int argc, char** argv)
@@ -130,15 +204,17 @@ int main(int argc, char** argv)
     g.connect(10, 9);
     g.connect(11, 9, 12);
 
-    dfs_path path{g, 0z};
+    bfs_path path{g, 0z};
 
     std::cout << "has path(0, 6): " << std::boolalpha << path.has_path(6) << std::endl;
     std::cout << "has path(0, 3): " << std::boolalpha << path.has_path(6) << std::endl;
 
     auto p = path.path(3);
 
-    std::copy(p.begin(), p.end(),std::ostream_iterator<int>(std::cout, " "));
+    std::copy(p.begin(), p.end(), std::ostream_iterator<int>(std::cout, " "));
     std::cout << std::endl;
+
+    std::cout << "distance path(0, 3): " << std::boolalpha << path.distance(3) << std::endl;
 
     return 0;
 }
