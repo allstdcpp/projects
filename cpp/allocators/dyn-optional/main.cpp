@@ -42,7 +42,7 @@ class dyn_optional : dyn_optional_impl<T, Allocator>
 {
 public:
     using base_type = dyn_optional_impl<T, Allocator>;
-    using allocator_type = dyn_optional_impl<T, Allocator>::allocator_type;
+    using allocator_type = typename base_type::allocator_type;
 
     dyn_optional(allocator_type allocator = allocator_type())
         : dyn_optional_impl<T, Allocator>(allocator)
