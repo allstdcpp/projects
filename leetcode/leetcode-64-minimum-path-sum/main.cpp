@@ -1,47 +1,39 @@
-#include <functional>
-#include <iostream>
+#include <climits>
 #include <vector>
 
 class Solution
 {
 public:
-    int minPathSum(std::vector<std::vector<int>>& g)
+
+    int minPathSum(std::vector<std::vector<int>>& grid)
     {
-        int min = 201;
+        int rows = grid.size();
+        int cols = grid[0].size();
 
-        int rows = g.size();
-
-        std::function<void(int, int, int)> f = [&](int r, int c, int sum) {
-            if (r < 0 || r >= rows || c < 0 || c >= g[r].size())
-                return;
-
-            if (g[r][c] < 0)
-                return;
-
-            auto total = sum + g[r][c];
-            auto temp = g[r][c];
-            g[r][c] = -1;
-
-            if (r == rows - 1 && c == g[rows - 1].size() - 1)
+        for (auto r = rows - 1; r >= 0; --r)
+        {
+            for (auto c = cols - 1; c >= 0; --c)
             {
-                min = std::min(min, total);
-            }
-            else
-            {
-                f(r + 1, c, total);
-                f(r, c + 1, total);
-            }
-            g[r][c] = temp;
-        };
+                auto bottom = INT_MAX;
+                if (!(r + 1 >= rows))
+                {
+                    bottom = grid[r + 1][c];
+                }
+                auto right = INT_MAX;
+                if (!(c + 1 >= cols))
+                {
+                    right = grid[r][c + 1];
+                }
 
-        f(0, 0, 0);
-        return min;
+                auto m = std::min(bottom, right);
+
+                if (m != INT_MAX)
+                    grid[r][c] += m;
+            }
+        }
+
+        return grid[0][0];
     }
 };
 
-int main(int argc, char** argv)
-{
-    std::vector vs{std::vector{1, 2, 3}, std::vector{4, 5, 6}};
-    std::cout << (Solution{}.minPathSum(vs)) << std::endl;
-    return 0;
-}
+int main(int argc, char** argv) {}
